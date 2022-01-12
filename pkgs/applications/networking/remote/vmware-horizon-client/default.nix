@@ -56,7 +56,7 @@ let
     };
     nativeBuildInputs = [ makeWrapper ];
     installPhase = ''
-      mkdir -p ext $out/lib/vmware/view/pkcs11
+      mkdir ext $out
       find ${sysArch} -type f -print0 | xargs -0n1 tar -Cext --strip-components=1 -xf
       mv ext/bin ext/lib ext/share "$out"/
 
@@ -72,15 +72,16 @@ let
       # This library causes the program to core-dump occasionally. Use ours instead.
       rm $out/lib/vmware/view/crtbora/libcairo.*
 
-      # Enable smart card login
-      ln -s ${opensc}/lib/opensc-pkcs11.so $out/lib/vmware/view/pkcs11/libopenscpkcs11.so
-
       # Force the default GTK theme (Adwaita) because Horizon is prone to
       # UI usability issues when using non-default themes, such as Adwaita-dark.
       makeWrapper "$out/bin/vmware-view" "$out/bin/vmware-view_wrapper" \
           --set GTK_THEME Adwaita \
           --suffix XDG_DATA_DIRS : "${gsettings-desktop-schemas}/share/gsettings-schemas/${gsettings-desktop-schemas.name}" \
           --suffix LD_LIBRARY_PATH : "$out/lib/vmware/view/crtbora:$out/lib/vmware"
+
+      # Enable smart card login
+      mkdir -p $out/lib/vmware/view/pkcs11
+      ln -s ${opensc}/lib/opensc-pkcs11.so $out/lib/vmware/view/pkcs11/libopenscpkcs11.so
     '';
   };
 
