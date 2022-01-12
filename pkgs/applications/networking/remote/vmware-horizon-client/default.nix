@@ -37,6 +37,7 @@
 , pcsclite
 , pixman
 , zlib
+, opensc
 }:
 let
   version = "2106.1";
@@ -55,7 +56,7 @@ let
     };
     nativeBuildInputs = [ makeWrapper ];
     installPhase = ''
-      mkdir ext $out
+      mkdir -p ext $out/lib/vmware/view/pkcs11
       find ${sysArch} -type f -print0 | xargs -0n1 tar -Cext --strip-components=1 -xf
       mv ext/bin ext/lib ext/share "$out"/
 
@@ -70,6 +71,9 @@ let
 
       # This library causes the program to core-dump occasionally. Use ours instead.
       rm $out/lib/vmware/view/crtbora/libcairo.*
+
+      # Enable smart card login
+      ln -s ${opensc}/lib/opensc-pkcs11.so $out/lib/vmware/view/pkcs11/libopenscpkcs11.so
 
       # Force the default GTK theme (Adwaita) because Horizon is prone to
       # UI usability issues when using non-default themes, such as Adwaita-dark.
